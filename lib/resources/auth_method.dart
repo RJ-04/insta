@@ -8,19 +8,33 @@ class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+/* user details */
+
+  Future<model.User> getUserDetails() async {
+    User currentUser = _auth.currentUser!;
+
+    DocumentSnapshot snap =
+        await _firestore.collection("users").doc(currentUser.uid).get();
+
+    return model.User.fromSnap(snap);
+  }
+
   /* sign up */
 
   Future<String> signUpUser({
     required String email,
     required String password,
     required String username,
-    String bio = "",
+    required String bio,
     required Uint8List file,
   }) async {
     String result = "Some error occured";
 
     try {
-      if (email.isNotEmpty && password.isNotEmpty && username.isNotEmpty) {
+      if (email.isNotEmpty &&
+          password.isNotEmpty &&
+          username.isNotEmpty &&
+          bio.isNotEmpty) {
         /* register user */
 
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
@@ -92,5 +106,11 @@ class AuthMethods {
       }
     }
     return result;
+  }
+
+  /* signing out */
+
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 }

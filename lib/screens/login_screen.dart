@@ -5,6 +5,7 @@ import 'package:instagram_flutter/responsive/responsive_layout_screen.dart';
 import 'package:instagram_flutter/responsive/web_screen_layout.dart';
 import 'package:instagram_flutter/screens/sign_up_screen.dart';
 import 'package:instagram_flutter/utils/colors.dart';
+import 'package:instagram_flutter/utils/global_variables.dart';
 import 'package:instagram_flutter/utils/utils.dart';
 import 'package:instagram_flutter/widgets/text_field.dart';
 
@@ -67,7 +68,10 @@ class _LogInState extends State<LogIn> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(25.0),
+          padding: MediaQuery.of(context).size.width > webScreen
+              ? EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 3.5)
+              : const EdgeInsets.all(25.0),
           width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,10 +113,14 @@ class _LogInState extends State<LogIn> {
               /* login button */
 
               InkWell(
+                splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
                 onTap: logInUser,
                 splashColor: secondaryColor,
                 borderRadius: const BorderRadius.all(Radius.circular(100)),
-                hoverColor: blueColor,
+                hoverColor: secondaryColor,
+                onLongPress: () {
+                  secondaryColor;
+                },
                 mouseCursor: MaterialStateMouseCursor.clickable,
                 child: Container(
                   width: double.tryParse('300'),
@@ -121,15 +129,15 @@ class _LogInState extends State<LogIn> {
                   child: _isLoading
                       ? const Center(
                           child: CircularProgressIndicator.adaptive(
+                            valueColor: AlwaysStoppedAnimation(secondaryColor),
                             strokeWidth: 3.5,
-                            valueColor: AlwaysStoppedAnimation(blueColor),
-                            backgroundColor: secondaryColor,
+                            backgroundColor: Color.fromARGB(255, 0, 255, 8),
                             strokeCap: StrokeCap.round,
                           ),
                         )
                       : const Text(
                           "Log In",
-                          selectionColor: Color(0x00002e2a),
+                          selectionColor: mobileBackgroundColor,
                         ),
                 ),
               ),

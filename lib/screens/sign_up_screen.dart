@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_flutter/resources/auth_method.dart';
 import 'package:instagram_flutter/responsive/responsive_layout_screen.dart';
 import 'package:instagram_flutter/screens/login_screen.dart';
 import 'package:instagram_flutter/utils/colors.dart';
+import 'package:instagram_flutter/utils/global_variables.dart';
 import 'package:instagram_flutter/widgets/text_field.dart';
 import '../responsive/mobile_screen_layout.dart';
 import '../responsive/web_screen_layout.dart';
@@ -37,24 +39,30 @@ class _SignUpState extends State<SignUp> {
 
   void selectImage() async {
     Uint8List im = await pickImage(ImageSource.gallery);
-
     setState(() {
       _image = im;
     });
   }
 
   void signUpUser() async {
+    _image ??= (await NetworkAssetBundle(Uri.parse(
+                'https://tse1.mm.bing.net/th?id=OIP.fpHfhXiopsHerHiZdhKIDAAAAA&pid=Api&P=0'))
+            .load(
+                'https://tse1.mm.bing.net/th?id=OIP.fpHfhXiopsHerHiZdhKIDAAAAA&pid=Api&P=0'))
+        .buffer
+        .asUint8List();
+
     setState(() {
       _isLoading = true;
     });
-    String res = await AuthMethods().signUpUser(
+    String result = await AuthMethods().signUpUser(
       email: _emailController.text,
       password: _passwordController.text,
       username: _usernameController.text,
       bio: _bioController.text,
       file: _image!,
     );
-    if (res == "success") {
+    if (result == "success") {
       // ignore: use_build_context_synchronously
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -66,7 +74,7 @@ class _SignUpState extends State<SignUp> {
       );
     } else {
       // ignore: use_build_context_synchronously
-      showSnackBar(context, res);
+      showSnackBar(context, result);
     }
 
     setState(() {
@@ -84,7 +92,10 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(10.0),
+          padding: MediaQuery.of(context).size.width > webScreen
+              ? EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 3.5)
+              : const EdgeInsets.all(8.0),
           width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,10 +108,10 @@ class _SignUpState extends State<SignUp> {
                 'assests/ic_instagram.svg',
                 colorFilter:
                     const ColorFilter.mode(primaryColor, BlendMode.srcATop),
-                height: 90,
+                height: 85,
               ),
-              const SizedBox(height: 2),
-              Flexible(flex: 3, child: Container()),
+              const SizedBox(height: 1),
+              Flexible(flex: 2, child: Container()),
 
               /* circular widget to accept and show our selected file */
 
@@ -181,8 +192,12 @@ class _SignUpState extends State<SignUp> {
               InkWell(
                 onTap: signUpUser,
                 splashColor: secondaryColor,
+                splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
                 borderRadius: const BorderRadius.all(Radius.circular(100)),
-                hoverColor: blueColor,
+                hoverColor: secondaryColor,
+                onLongPress: () {
+                  secondaryColor;
+                },
                 mouseCursor: MaterialStateMouseCursor.clickable,
                 child: Container(
                   width: double.tryParse('325'),
@@ -191,9 +206,9 @@ class _SignUpState extends State<SignUp> {
                   child: _isLoading
                       ? const Center(
                           child: CircularProgressIndicator.adaptive(
+                            valueColor: AlwaysStoppedAnimation(secondaryColor),
                             strokeWidth: 3.5,
-                            valueColor: AlwaysStoppedAnimation(blueColor),
-                            backgroundColor: secondaryColor,
+                            backgroundColor: Color.fromARGB(255, 0, 255, 8),
                             strokeCap: StrokeCap.round,
                           ),
                         )
